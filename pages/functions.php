@@ -13,7 +13,7 @@ function register($name, $pass, $email)
         return false;
     }
     if(strlen($name) < 3 || strlen($name) > 30 ||
-        strlen($pass) < 3 || strlen($pass) > 30)
+       strlen($pass) < 3 || strlen($pass) > 30)
     {
         echo "<h3/><span style='color:red;'>
             Values Length Must Be Between 3 And 30!</span><h3/>";
@@ -37,4 +37,31 @@ function register($name, $pass, $email)
     fputs($file,$line);
     fclose($file);
     return true;
+}
+
+function login($name, $pass)
+{
+    global $users;
+    $name = trim(htmlspecialchars($name));
+    $pass = trim(htmlspecialchars($pass));
+
+    if ($name == '' || $pass == '') {
+        echo "<h3/><span style='color:red;'>Both fields are required!</span><h3/>";
+        return false;
+    }
+
+    $file = fopen($users, 'r');
+    while ($line = fgets($file, 128)) {
+        $line = trim($line);
+        list($stored_name, $stored_pass) = explode(":", $line);
+        if ($stored_name == $name && md5($pass) == $stored_pass) {
+            // Створюємо сесію, якщо користувач знайдений
+            $_SESSION['registered_user'] = $name;
+            fclose($file);
+            return true;
+        }
+    }
+    fclose($file);
+    echo "<script>window.location = 'index.php?page=4';</script>";
+    return false;
 }
